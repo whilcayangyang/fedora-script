@@ -16,7 +16,7 @@ System update and upgrade|GNS3 Network Simulator|VirtualBox|WineHQ|Google Chrome
 3.) Install VirtualBox</br>
 4.) Install WineHQ</br>
 5.) Install Google Chrome</br>
-6.) Install Work application (I'm still working with option menu...)</br>
-7.) Install Essential application (I'm still working on this part so be right back...)</br>
+6.) Install Work application **(I'm still working with option menu...)**</br>
+7.) Install Essential application **(I'm still working on this part so be right back...)**</br>
 8.) Enable Fedora RPMFusion</br>
-9.) Other Options (Everything's working I'm just checking in any possible additional features...)</br>
+9.) Other Options **(Everything's working I'm just checking in any possible additional features...)**</br>
