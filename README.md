@@ -7,7 +7,6 @@ I use this script everytime I fresh installed Fedora in my machine for general p
 In addition, it helps me to setup our office laptop devices after I installed Fedora as replacement for Microsoft Windows.
 
 **TESTED IN FEDORA 34**</br>
-System update and upgrade|GNS3 Network Simulator|VirtualBox|WineHQ|Google Chrome|Work application:Viber, Zoom Meeting App|Enable Fedora RPMFusion
 
 # Features
 
