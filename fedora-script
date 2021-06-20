@@ -23,7 +23,7 @@ fi
 
 function main_menu {
 option=0
-    until [ "$option" = "9" ]; do
+    until [ "$option" = "8" ]; do
         clear
         neofetch --color_blocks off
         echo ""
@@ -45,7 +45,7 @@ fi
         echo "  7.) Other Options"
         echo "  8.) Quit"
         echo ""
-        echo -n " ${bold}Enter choice [${end} 1 - 10 ${end}${bold}]: ${end}"
+        echo -n " ${bold}Enter choice [${end} 1 - 8 ${end}${bold}]: ${end}"
         read option
         case $option in
             1 ) full_upgrade ; pause ;;
