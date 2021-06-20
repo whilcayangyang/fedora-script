@@ -11,12 +11,11 @@ System update and upgrade|GNS3 Network Simulator|VirtualBox|WineHQ|Google Chrome
 
 # Features
 
-1.) System update and upgrade</br>
+1.) System update and upgrade (Please reboot after system upgrade)</br>
 2.) Install GNS3 Network Simulator</br>
 3.) Install VirtualBox</br>
 4.) Install WineHQ</br>
-5.) Install Google Chrome</br>
-6.) Install Work application:Viber, Zoom Meeting App</br>
-7.) Install Essential application **(I'm still working on this part so be right back...)**</br>
-8.) Enable Fedora RPMFusion</br>
-9.) Other Options **(Everything's working I'm just checking in any possible additional features...)**</br>
+5.) Install Proprietary Software</br>
+6.) Enable Fedora RPMFusion (Enable this before anything else)</br>
+7.) Other Options</br>
+8.) Quit</br>
