@@ -1,6 +1,6 @@
 # Fedora Essential Script
 
-This script allows you to install packages quickly after the fresh installation of Fedora.</br>
+This script allows you to install packages quickly and convenient way after the fresh installation of Fedora.</br>
 
 **Testimony**</br>
 I use this script everytime I fresh installed Fedora in my machine for general purposes.</br>
