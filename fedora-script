@@ -159,7 +159,7 @@ fi
     #5.) Install proprietary application"
     function install_proprietary {
         option=0
-        until [ "$option" = "3" ]; do
+        until [ "$option" = "5" ]; do
         clear
         neofetch --color_blocks off
         echo ""
@@ -255,7 +255,7 @@ fi
     #7.) Other Options"
     function other_options {
         option=0
-        until [ "$option" = "3" ]; do
+        until [ "$option" = "7" ]; do
         clear
         neofetch --color_blocks off
         echo ""
