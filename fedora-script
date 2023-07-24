@@ -8,17 +8,15 @@ bold=$'\e[1m'
 red=$'\e[91m'
 std='\033[0;0;39m'
 
-
 pause(){
   read -p "Press [Enter] key to continue..." fackEnterKey
 }
-
 
 if rpm -qa | grep neofetch > /dev/null; then
     echo ""
 else
     echo "Installing prerequisite...."; sleep 1
-	sudo dnf install neofetch -y
+	sudo dnf install -y neofetch
 fi
 
 function main_menu {
@@ -32,17 +30,17 @@ option=0
 if id -u | grep 1000 > /dev/null; then
     echo "${bold}Privilege: $user ${end}"
 else
-    echo "${bold}${red}Run the script without sudo. Some option might be broken in root access.${end}"
+    echo "${bold}${red}ERROR: Run this script in non-sudo. Some installation might be broken in root access.${end}"
 fi
 
         echo ""
         echo "  1.) System update and upgrade (Please reboot after system upgrade)"
         echo "  2.) Install GNS3 Network Simulator"
         echo "  3.) Install VirtualBox"
-        echo "  4.) Install WineHQ"
-        echo "  5.) Install Proprietary Software"
-        echo "  6.) Enable Fedora RPMFusion (Enable this before anything else)"
-        echo "  7.) Other Options"
+        echo "  4.) Install Docker CE"
+        echo "  5.) Enable Flatpak Flathub Remotes"
+        echo "  6.) Enable Fedora RPMFusion"
+        echo "  7.) More Options"
         echo "  8.) Quit"
         echo ""
         echo -n " ${bold}Enter choice [${end} 1 - 8 ${end}${bold}]: ${end}"
@@ -51,8 +49,8 @@ fi
             1 ) full_upgrade ; pause ;;
             2 ) install_gns3 ; pause ;;
             3 ) install_virtualbox ; pause ;;
-            4 ) install_winehq ; pause ;;
-            5 ) install_proprietary;;
+            4 ) install_docker ; pause ;;
+            5 ) enable_flathub;;
     	    6 ) install_rpmfusion ; pause ;;
             7 ) other_options ; pause ;;
             8 ) exit 0;;
@@ -67,7 +65,18 @@ fi
         clear
         neofetch --color_blocks off
         echo ""
+
         echo "Preparing System update and upgrade..."; sleep 2
+        echo ""
+        if cat /etc/dnf/dnf.conf | grep -E "fastestmirror|max_parallel_downloads" > /dev/null; then
+        echo "DNF respositories is already optimized"; sleep 2
+        else echo "Optimizing DNF repository...."; sleep 2
+        sudo sh -c "echo 'fastestmirror=True' | tee -a /etc/dnf/dnf.conf > /dev/null"
+        sudo sh -c "echo 'max_parallel_downloads=10' | tee -a /etc/dnf/dnf.conf > /dev/null"
+        fi
+
+        echo ""
+        sudo dnf check-update && \
         sudo dnf upgrade -y
         echo ""
     }
@@ -78,23 +87,16 @@ fi
         neofetch --color_blocks off
         echo ""
         echo "Preparing to install GNS3 Network Simulator..."; sleep 2
-    	sudo dnf install gns3-gui gns3-server dynamips ubridge wireshark libvirt -y
-
-        #User permission
-        echo ""
-        echo "GNS3 needs permission to get work"
-        echo ""
-        read -p "Enter username: " username
-        read -p "Username ${bold}$username${end} is this correct? (Y/N): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || main_menu
-    	sudo usermod -aG ubridge $username
-    	sudo usermod -aG libvirt $username
-    	sudo usermod -aG kvm $username
-    	sudo usermod -aG wireshark $username
-    	sudo usermod -aG docker $username
+        sudo pip3 install gns3-gui gns3-server && \
+        sudo python3 -m pip install pyqt5 && \
+    	sudo dnf install dynamips ubridge wireshark libvirt -y && \
+    	sudo usermod -aG ubridge $user && \
+    	sudo usermod -aG libvirt $user && \
+    	sudo usermod -aG kvm $user && \
+    	sudo usermod -aG wireshark $user
         echo ""
     }
     
-
     #3.) Install VirtualBox"
     function install_virtualbox {
         clear
@@ -118,107 +120,40 @@ fi
         echo ""
     }            
 
-
-    #4.) Install WineHQ"
-    function install_winehq {
-        option=0
-        until [ "$option" = "3" ]; do
+    #4.) Install Docker CE"
+    function install_docker {
         clear
         neofetch --color_blocks off
         echo ""
-        echo "  1.) Stable branch"
-        echo "  2.) Development branch"
-        echo "  3.) Back"
+        echo "Enabling Docker CE..."; sleep 2
+        sudo dnf remove -y docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-selinux \
+                  docker-engine-selinux \
+                  docker-engine && \
+        sudo dnf install -y dnf-plugins-core && \
+        sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo && \
+        sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin && \
+        sudo systemctl enable --now docker && \
+        sudo usermod -aG docker $user
         echo ""
-        echo -n "${bold}Enter choice [ 1 - 3 ]: ${end}"
-        read option
-        case $option in
-            1 ) winehq_stable ; pause ;;
-            2 ) winehq_devel ; pause ;;
-            3 ) main_menu ;;
-            * ) echo -e "${red}${bold}invalid option...${end}" && sleep 2
-        esac
-    done
-    }  
+    }
 
-        function winehq_stable {
-        	echo "Preparing to install WineHQ Stable branch..."; sleep 2
-			sudo dnf config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/34/winehq.repo
-			sudo dnf install winehq-stable -y
-
-        }
-
-        function winehq_devel {
-        	echo "Preparing to install WineHQ Development branch..."; sleep 2
-			sudo dnf config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/34/winehq.repo
-			sudo dnf install winehq-devel -y
-
-        }
-
-
-    #5.) Install proprietary application"
-    function install_proprietary {
-        option=0
-        until [ "$option" = "5" ]; do
+    #5.) Enable Flathub"
+    function enable_flathub {
         clear
         neofetch --color_blocks off
         echo ""
-        echo "  1.) Google Chrome"
-        echo "  2.) Viber"
-        echo "  3.) Zoom App"
-        echo "  4.) Spotify Music"
-        echo "  5.) Back"
+        echo "Enabling Flathub..."; sleep 2
+        flatpak remote-modify --enable flathub && \
+        flatpak install flathub
         echo ""
-        echo -n "${bold}Enter choice [ 1 - 5 ]: ${end}"
-        read option
-        case $option in
-            1 ) install_chrome ; pause ;;
-            2 ) install_viber ; pause ;;
-            3 ) install_zoom ; pause ;;
-            4 ) install_spotify ; pause ;;
-            5 ) main_menu ;;
-            * ) echo -e "${red}${bold}invalid option...${end}" && sleep 2
-        esac
-    done
-    }  
-
-        function install_chrome {
-            echo "Preparing to install Google Chrome..."; sleep 2
-            cd /tmp
-            wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
-            sudo dnf install ./google-chrome-stable_current_x86_64.rpm -y
-
-        }
-
-        function install_viber {
-            echo "Preparing to install Viber..."; sleep 2
-            cd /tmp
-            wget https://download.cdn.viber.com/desktop/Linux/viber.rpm
-            rpm2cpio viber.rpm | cpio -idmv
-            sudo cp -R opt /
-            sudo cp -R usr /
-
-        }            
-
-        function install_zoom {
-            echo "Preparing to install Zoom application..."; sleep 2
-            cd /tmp
-            wget https://zoom.us/client/latest/zoom_x86_64.rpm
-            sudo dnf install ./zoom_x86_64.rpm -y
-
-        }
-
-        function install_spotify {
-            echo "Preparing to install Spotify Music via snapd..."; sleep 2
-            sudo dnf install snapd -y
-            sudo ln -s /var/lib/snapd/snap /snap
-            sudo systemctl start snapd
-            
-            #install the hello-world snap and make sure it runs correctly
-            sudo snap install hello-world
-            sudo snap install spotify
-
-        }
+    }
 
     #6.) Install RPM Fusion"
     function install_rpmfusion {
@@ -244,92 +179,64 @@ fi
 
         function rpmfusion_free {
         	echo "Preparing to install RPM Fusion (FREE)..."; sleep 2
-		    sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm -y
+		    sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
         }
 
         function rpmfusion_nonfree {
         	echo "Preparing to install RPM Fusion (NON-FREE)..."; sleep 2
-		    sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
+		    sudo dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
         }
 
-    #7.) Other Options"
+    #7.) More Options"
     function other_options {
         option=0
-        until [ "$option" = "7" ]; do
+        until [ "$option" = "4" ]; do
         clear
         neofetch --color_blocks off
         echo ""
-        echo "  1.) Optimize Fedora DNF Download Speed"
-        echo "  2.) Install Ubuntu Fonts & Microsoft Fonts"
-        echo "  3.) Install multimedia codecs/restricted extras"
-        echo "  4.) Install Sublime Text"
-        echo "  5.) Install Brave Browser"
-        echo "  6.) Install VLC Player"        
-        echo "  7.) Back"
+        echo "  1.) Install Ubuntu Fonts & Microsoft Fonts"
+        echo "  2.) Install ZSH / Oh! My ZSH"
+        echo "  3.) Install Sublime Text"     
+        echo "  4.) Back"
         echo ""
-        echo -n "${bold}Enter choice [ 1 - 7 ]: ${end}"
+        echo -n "${bold}Enter choice [ 1 - 4 ]: ${end}"
         read option
         case $option in
-            1 ) dnf_speedup ; pause ;;
-            2 ) install_font ; pause ;;
-            3 ) install_restricted_codecs ; pause ;;
-            4 ) install_sublime ; pause ;;
-            5 ) install_brave ; pause ;;
-            6 ) install_vlc ; pause ;;
-            7 ) main_menu ;;
+            1 ) install_font ; pause ;;
+            2 ) install_ohmyzsh ; pause ;;
+            3 ) install_sublime ; pause ;;
+            4 ) main_menu ;;
             * ) echo -e "${red}${bold}invalid option...${end}" && sleep 2
         esac
     done
-    }  
-
-        function dnf_speedup {
-            if cat /etc/dnf/dnf.conf | grep -E "fastestmirror|max_parallel_downloads" > /dev/null; then
-            echo "DNF respositories is already optimized"; sleep 2
-
-            else echo "Optimizing DNF repository...."; sleep 2
-            sudo sh -c "echo 'fastestmirror=True' | tee -a /etc/dnf/dnf.conf > /dev/null"
-            sudo sh -c "echo 'max_parallel_downloads=10' | tee -a /etc/dnf/dnf.conf > /dev/null"
-            fi
-            echo ""
-        }
+    }
 
         function install_font {
             echo "Preparing to install Ubuntu and Microsoft Fonts..."; sleep 2
-            cd /tmp
-            wget https://assets.ubuntu.com/v1/0cef8205-ubuntu-font-family-0.83.zip
-            unzip 0cef8205-ubuntu-font-family-0.83.zip 
-            sudo mv -f ubuntu-font-family-0.83 /usr/share/fonts/
-            sudo chmod -R --reference=/usr/share/fonts/cantarell /usr/share/fonts/ubuntu-font-family-0.83
-            sudo chown -R --reference=/usr/share/fonts/cantarell /usr/share/fonts/ubuntu-font-family-0.83
-            fc-cache -fv
-
-            sudo dnf -y install curl cabextract xorg-x11-font-utils fontconfig
+            cd /tmp && \
+            wget https://assets.ubuntu.com/v1/0cef8205-ubuntu-font-family-0.83.zip && \
+            unzip 0cef8205-ubuntu-font-family-0.83.zip && \
+            sudo mv -f ubuntu-font-family-* /usr/share/fonts/ubuntu-font-family && \
+            sudo chmod -R --reference=/usr/share/fonts/open-sans /usr/share/fonts/ubuntu-font-family && \
+            sudo chown -R --reference=/usr/share/fonts/open-sans /usr/share/fonts/ubuntu-font-family && \
+            fc-cache -fv && \
+            sudo dnf install -y curl cabextract xorg-x11-font-utils fontconfig && \
             sudo rpm -ivh https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcore-fonts-installer-2.6-1.noarch.rpm
         }
 
-        function install_restricted_codecs {
-            echo "Preparing to install multimedia/restricted extras..."; sleep 2
-            sudo dnf install gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel -y; sudo dnf install lame\* --exclude=lame-devel -y; sudo dnf group upgrade --with-optional Multimedia -y
+        function install_ohmyzsh {
+            echo "Preparing to install Oh My Zsh..."; sleep 2
+            sudo dnf install -y zsh && \
+            sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
+            sudo lchsh $USER
         }
 
         function install_sublime {
             echo "Preparing to install Sublime Text..."; sleep 2
-            sudo rpm -v --import https://download.sublimetext.com/sublimehq-rpm-pub.gpg
-            sudo dnf config-manager --add-repo https://download.sublimetext.com/rpm/stable/x86_64/sublime-text.repo
-            sudo dnf install sublime-text -y
-        }
-
-        function install_brave {
-            echo "Preparing to install Brave Browser..."; sleep 2
-            sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/x86_64/
-            sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
-            sudo dnf install brave-browser -y
-        }
-
-        function install_vlc {
-            echo "Preparing to install VLC..."; sleep 2
-            sudo dnf install vlc -y
-        }        
+            sudo rpm -v --import https://download.sublimetext.com/sublimehq-rpm-pub.gpg && \
+            sudo dnf config-manager --add-repo https://download.sublimetext.com/rpm/stable/x86_64/sublime-text.repo && \
+            sudo dnf install -y sublime-text
+        }     
             
 #infinite loop
 while true
