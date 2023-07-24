@@ -16,4 +16,8 @@ I use this script everytime I fresh installed Fedora in my machine for general p
 5.) Enable Flatpak Flathub</br>
 6.) Enable Fedora RPMFusion (Enable this before anything else)</br>
 7.) More Options</br>
+    1.) Install Ubuntu Fonts & Microsoft Fonts</br>
+    2.) Install ZSH / Oh! My ZSH</br>
+    3.) Install Sublime Text</br>
+    4.) Back</br>
 8.) Quit</br>
