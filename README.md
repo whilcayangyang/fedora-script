@@ -4,17 +4,16 @@ This script allows you to install packages quickly and convenient way after the 
 
 **Testimony**</br>
 I use this script everytime I fresh installed Fedora in my machine for general purposes.</br>
-In addition, it helps me to setup our office laptop devices after I installed Fedora as replacement for Microsoft Windows.
 
-**TESTED IN FEDORA 34**</br>
+**TESTED IN FEDORA 38**</br>
 
 # Features
 
-1.) System update and upgrade (Please reboot after system upgrade)</br>
-2.) Install GNS3 Network Simulator</br>
-3.) Install VirtualBox</br>
-4.) Install WineHQ</br>
-5.) Install Proprietary Software</br>
-6.) Enable Fedora RPMFusion (Enable this before anything else)</br>
-7.) Other Options</br>
+1.) System update and upgrade (Please reboot after system upgrade)
+2.) Install GNS3 Network Simulator
+3.) Install VirtualBox
+4.) Install Docker CE
+5.) Enable Flatpak Flathub
+6.) Enable Fedora RPMFusion (Enable this before anything else)
+7.) More Options
 8.) Quit</br>
