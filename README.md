@@ -9,11 +9,11 @@ I use this script everytime I fresh installed Fedora in my machine for general p
 
 # Features
 
-1.) System update and upgrade (Please reboot after system upgrade)
-2.) Install GNS3 Network Simulator
-3.) Install VirtualBox
-4.) Install Docker CE
-5.) Enable Flatpak Flathub
-6.) Enable Fedora RPMFusion (Enable this before anything else)
-7.) More Options
+1.) System update and upgrade (Please reboot after system upgrade)</br>
+2.) Install GNS3 Network Simulator</br>
+3.) Install VirtualBox</br>
+4.) Install Docker CE</br>
+5.) Enable Flatpak Flathub</br>
+6.) Enable Fedora RPMFusion (Enable this before anything else)</br>
+7.) More Options</br>
 8.) Quit</br>
