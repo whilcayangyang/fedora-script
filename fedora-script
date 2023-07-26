@@ -226,7 +226,7 @@ fi
 
         function install_ohmyzsh {
             echo "Preparing to install Oh My Zsh..."; sleep 2
-            sudo dnf install -y zsh && \
+            sudo dnf install -y zsh powerline-fonts && \
             sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
             sudo lchsh $USER
         }
