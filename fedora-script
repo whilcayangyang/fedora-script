@@ -49,8 +49,8 @@ if [ $laptop ]; then
 	sudo sed -i 's/#PLATFORM_PROFILE_ON_BAT=low-power/PLATFORM_PROFILE_ON_BAT=low-power/' /etc/tlp.conf
 
 # NOTE: Threshold values depends on the laptop vendor. See documentation: https://linrunner.de/tlp/settings/bc-vendors.html
-	sudo sed -i 's/#START_CHARGE_THRESH_BAT1=75/START_CHARGE_THRESH_BAT1=0/' /etc/tlp.conf
-	sudo sed -i 's/#STOP_CHARGE_THRESH_BAT1=80/STOP_CHARGE_THRESH_BAT1=1/' /etc/tlp.conf
+	sudo sed -i 's/#START_CHARGE_THRESH_BAT0=75/START_CHARGE_THRESH_BAT0=0/' /etc/tlp.conf
+	sudo sed -i 's/#STOP_CHARGE_THRESH_BAT0=80/STOP_CHARGE_THRESH_BAT0=1/' /etc/tlp.conf
 	
 	sudo sed -i 's/#RESTORE_DEVICE_STATE_ON_STARTUP=0/RESTORE_DEVICE_STATE_ON_STARTUP=1/' /etc/tlp.conf
 else
@@ -91,18 +91,13 @@ sudo flatpak remote-modify --disable fedora
 sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 sudo flatpak remote-modify --enable flathub
 
-# Gnome Software make flatpak as default
+# gnome-software make flatpak as default
 gsettings set org.gnome.software packaging-format-preference "['flatpak', 'rpm']"
 
 # install gtk3 themes, GIMP, Transmission, Calibre, LibreOffice, Flatseal, Discord, Drawio
 flatpak install --noninteractive flathub org.gtk.Gtk3theme.adw-gtk3 org.gtk.Gtk3theme.adw-gtk3-dark org.gimp.GIMP com.transmissionbt.Transmission com.calibre_ebook.calibre org.libreoffice.LibreOffice com.github.tchx84.Flatseal com.discordapp.Discord com.jgraph.drawio.desktop
 
-# install microsoft fonts & multimedia codes
-sudo dnf install -y curl \
-		cabextract \
-		xorg-x11-font-utils \
-		fontconfig
-sudo rpm -ivh https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcore-fonts-installer-2.6-1.noarch.rpm
+# install multimedia codes
 sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-plugin-libav --exclude=gstreamer1-plugins-bad-free-devel
 sudo dnf install -y lame\* --exclude=lame-devel
 sudo dnf group upgrade -y --with-optional Multimedia
