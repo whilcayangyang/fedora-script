@@ -10,13 +10,13 @@ sudo sh -c "echo 'max_parallel_downloads=10' | tee -a /etc/dnf/dnf.conf > /dev/n
 sudo dnf upgrade -y
 
 # install/remove necessary package
+sudo dnf autoremove -y libreoffice-core
 sudo dnf install -y gnome-shell-extension-system-monitor-applet \
 			gnome-shell-extension-blur-my-shell \
 			gnome-shell-extension-freon \
 			adw-gtk3-theme \
 			papirus-icon-theme \
 			thunderbird
-sudo dnf autoremove -y libreoffice-core
 
 # install kvm virtualization
 sudo dnf install -y bridge-utils libvirt virt-install virt-manager qemu-kvm
@@ -53,7 +53,6 @@ if [ $laptop ]; then
 	sudo sed -i 's/#STOP_CHARGE_THRESH_BAT1=80/STOP_CHARGE_THRESH_BAT1=1/' /etc/tlp.conf
 	
 	sudo sed -i 's/#RESTORE_DEVICE_STATE_ON_STARTUP=0/RESTORE_DEVICE_STATE_ON_STARTUP=1/' /etc/tlp.conf
-
 else
 	echo "Nothing to do!"; sleep 2
 fi
