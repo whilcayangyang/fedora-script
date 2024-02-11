@@ -47,7 +47,8 @@ if [ $laptop ]; then
 	
 	sudo sed -i 's/#PLATFORM_PROFILE_ON_AC=performance/PLATFORM_PROFILE_ON_AC=performance/' /etc/tlp.conf
 	sudo sed -i 's/#PLATFORM_PROFILE_ON_BAT=low-power/PLATFORM_PROFILE_ON_BAT=low-power/' /etc/tlp.conf
-	
+
+# NOTE: Threshold value is depends on the laptop vendor. See documentation: https://linrunner.de/tlp/settings/bc-vendors.html
 	sudo sed -i 's/#START_CHARGE_THRESH_BAT1=75/START_CHARGE_THRESH_BAT1=0/' /etc/tlp.conf
 	sudo sed -i 's/#STOP_CHARGE_THRESH_BAT1=80/STOP_CHARGE_THRESH_BAT1=1/' /etc/tlp.conf
 	
