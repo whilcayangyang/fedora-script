@@ -1,132 +1,53 @@
 #!/bin/bash
-
 user=$(whoami)
+laptop=$(hostnamectl chassis | grep laptop)
+desktop=$(hostnamectl chassis | grep desktop)
 
-#Color & Formatting
-end=$'\e[0m'
-bold=$'\e[1m'
-red=$'\e[91m'
-std='\033[0;0;39m'
+# optimize DNF download
+sudo sh -c "echo 'max_parallel_downloads=10' | tee -a /etc/dnf/dnf.conf > /dev/null"
 
-pause(){
-  read -p "Press [Enter] key to continue..." fackEnterKey
-}
+# system upgrade
+sudo dnf upgrade -y
 
-if rpm -qa | grep neofetch > /dev/null; then
-    echo ""
+# install/remove necessary package
+sudo dnf install -y gnome-shell-extension-system-monitor-applet \
+			gnome-shell-extension-blur-my-shell \
+			gnome-shell-extension-freon \
+			adw-gtk3-theme \
+			papirus-icon-theme \
+			thunderbird
+sudo dnf autoremove -y libreoffice-core
+
+# install kvm virtualization
+sudo dnf install -y bridge-utils libvirt virt-install virt-manager qemu-kvm
+sudo usermod -aG libvirt $user
+sudo systemctl start libvirtd
+sudo systemctl enable libvirtd
+
+# remove gnome-boxes
+sudo dnf autoremove -y gnome-boxes
+
+# laptop battery optimize
+if [ $laptop ]; then
+	sudo dnf remove -y power-profiles-daemon
+	sudo dnf install -y tlp tlp-rdw
+	sudo systemctl enable --now tlp.service
+	sudo systemctl mask systemd-rfkill.service
+	sudo systemctl mask systemd-rfkill.socket
 else
-    echo "Installing prerequisite...."; sleep 1
-	sudo dnf install -y neofetch
+	echo "Nothing to do!"; sleep 2
 fi
 
-function main_menu {
-option=0
-    until [ "$option" = "8" ]; do
-        clear
-        neofetch --color_blocks off
-        echo ""
-
-# Checking root access
-if id -u | grep 1000 > /dev/null; then
-    echo "${bold}Privilege: $user ${end}"
+# install gns3 on Desktop
+if [ $desktop ]; then
+	sudo dnf install -y gns3-gui gns3-server wireshark
+	sudo usermod -aG kvm,wireshark $user
 else
-    echo "${bold}${red}ERROR: Run this script in non-sudo. Some installation might be broken in root access.${end}"
+	echo "Nothing to do!"; sleep 2
 fi
 
-        echo ""
-        echo "  1.) System update and upgrade (Please reboot after system upgrade)"
-        echo "  2.) Install GNS3 Network Simulator"
-        echo "  3.) Install VirtualBox"
-        echo "  4.) Install Docker CE"
-        echo "  5.) Enable Flatpak Flathub Remotes"
-        echo "  6.) Enable Fedora RPMFusion"
-        echo "  7.) More Options"
-        echo "  8.) Quit"
-        echo ""
-        echo -n " ${bold}Enter choice [${end} 1 - 8 ${end}${bold}]: ${end}"
-        read option
-        case $option in
-            1 ) full_upgrade ; pause ;;
-            2 ) install_gns3 ; pause ;;
-            3 ) install_virtualbox ; pause ;;
-            4 ) install_docker ; pause ;;
-            5 ) enable_flathub;;
-    	    6 ) install_rpmfusion ; pause ;;
-            7 ) other_options ; pause ;;
-            8 ) exit 0;;
-            * ) echo -e " ${red}${bold}invalid option...${end}" && sleep 2
-        esac
-        
-    done
-}
-
-    #1.) System update and upgrade
-    function full_upgrade {
-        clear
-        neofetch --color_blocks off
-        echo ""
-
-        echo "Preparing System update and upgrade..."; sleep 2
-        echo ""
-        if cat /etc/dnf/dnf.conf | grep -E "fastestmirror|max_parallel_downloads" > /dev/null; then
-        echo "DNF respositories is already optimized"; sleep 2
-        else echo "Optimizing DNF repository...."; sleep 2
-        sudo sh -c "echo 'fastestmirror=True' | tee -a /etc/dnf/dnf.conf > /dev/null"
-        sudo sh -c "echo 'max_parallel_downloads=10' | tee -a /etc/dnf/dnf.conf > /dev/null"
-        fi
-
-        echo ""
-        sudo dnf check-update && \
-        sudo dnf upgrade -y
-        echo ""
-    }
-            
-    #2.) Install GNS3 Network Simulator
-    function install_gns3 {
-        clear
-        neofetch --color_blocks off
-        echo ""
-        echo "Preparing to install GNS3 Network Simulator..."; sleep 2
-        sudo pip3 install gns3-gui gns3-server && \
-        sudo python3 -m pip install pyqt5 && \
-    	sudo dnf install dynamips ubridge wireshark libvirt -y && \
-    	sudo usermod -aG ubridge $user && \
-    	sudo usermod -aG libvirt $user && \
-    	sudo usermod -aG kvm $user && \
-    	sudo usermod -aG wireshark $user
-        echo ""
-    }
-    
-    #3.) Install VirtualBox"
-    function install_virtualbox {
-        clear
-        neofetch --color_blocks off
-        echo ""
-        echo "Preparing to install VirtualBox..."; sleep 2
-    	cd /tmp
-    	wget https://www.virtualbox.org/download/oracle_vbox.asc
-    	sudo rpm --import oracle_vbox.asc
-    	sudo dnf config-manager --add-repo "https://download.virtualbox.org/virtualbox/rpm/fedora/virtualbox.repo"
-    	sudo dnf install @development-tools dkms -y
-    	sudo dnf install VirtualBox-6.1 -y
-
-        #User permission
-        echo ""
-        echo "VirtualBox needs permission to get work"
-        echo ""
-        read -p "Enter username: " username
-        read -p "Username ${bold}$username${end} is this correct? (Y/N): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || main_menu
-        sudo usermod -aG vboxusers $username
-        echo ""
-    }            
-
-    #4.) Install Docker CE"
-    function install_docker {
-        clear
-        neofetch --color_blocks off
-        echo ""
-        echo "Enabling Docker CE..."; sleep 2
-        sudo dnf remove -y docker \
+# install fedora docker-ce
+sudo dnf remove -y docker \
                   docker-client \
                   docker-client-latest \
                   docker-common \
@@ -135,112 +56,43 @@ fi
                   docker-logrotate \
                   docker-selinux \
                   docker-engine-selinux \
-                  docker-engine && \
-        sudo dnf install -y dnf-plugins-core && \
-        sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo && \
-        sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin && \
-        sudo systemctl enable --now docker && \
-        sudo usermod -aG docker $user
-        echo ""
-    }
+                  docker-engine
+sudo dnf install -y dnf-plugins-core
+sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+sudo dnf install -y docker-ce \
+		docker-ce-cli \
+		containerd.io \
+		docker-buildx-plugin \
+		docker-compose-plugin
+sudo systemctl enable --now docker
+sudo usermod -aG docker $user
 
-    #5.) Enable Flathub"
-    function enable_flathub {
-        clear
-        neofetch --color_blocks off
-        echo ""
-        echo "Enabling Flathub..."; sleep 2
-        flatpak remote-modify --enable flathub && \
-        flatpak install flathub
-        echo ""
-    }
+# enable flatpak flathub and disable fedora flatpak
+sudo flatpak remote-modify --disable fedora
+sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+sudo flatpak remote-modify --enable flathub
 
-    #6.) Install RPM Fusion"
-    function install_rpmfusion {
-        option=0
-        until [ "$option" = "3" ]; do
-        clear
-        neofetch --color_blocks off
-        echo ""
-        echo "  1.) RPM Fusion (FREE)"
-        echo "  2.) RPM Fusion (NON-FREE)"
-        echo "  3.) Back"
-        echo ""
-        echo -n "${bold}Enter choice [ 1 - 3 ]: ${end}"
-        read option
-        case $option in
-            1 ) rpmfusion_free ; pause ;;
-            2 ) rpmfusion_nonfree ; pause ;;
-            3 ) main_menu ;;
-            * ) echo -e "${red}${bold}invalid option...${end}" && sleep 2
-        esac
-    done
-    }  
+# Gnome Software make flatpak as default
+gsettings set org.gnome.software packaging-format-preference "['flatpak', 'rpm']"
 
-        function rpmfusion_free {
-        	echo "Preparing to install RPM Fusion (FREE)..."; sleep 2
-		    sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
-        }
+# install gtk3 themes, GIMP, Transmission, Calibre, LibreOffice, Flatseal, Discord, Drawio
+flatpak install --noninteractive flathub org.gtk.Gtk3theme.adw-gtk3 org.gtk.Gtk3theme.adw-gtk3-dark org.gimp.GIMP com.transmissionbt.Transmission com.calibre_ebook.calibre org.libreoffice.LibreOffice com.github.tchx84.Flatseal com.discordapp.Discord com.jgraph.drawio.desktop
 
-        function rpmfusion_nonfree {
-        	echo "Preparing to install RPM Fusion (NON-FREE)..."; sleep 2
-		    sudo dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-        }
+# install microsoft fonts
+sudo dnf install -y curl \
+		cabextract \
+		xorg-x11-font-utils \
+		fontconfig
+sudo rpm -ivh https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcore-fonts-installer-2.6-1.noarch.rpm
 
-    #7.) More Options"
-    function other_options {
-        option=0
-        until [ "$option" = "4" ]; do
-        clear
-        neofetch --color_blocks off
-        echo ""
-        echo "  1.) Install Ubuntu Fonts & Microsoft Fonts"
-        echo "  2.) Install ZSH / Oh! My ZSH"
-        echo "  3.) Install Sublime Text"     
-        echo "  4.) Back"
-        echo ""
-        echo -n "${bold}Enter choice [ 1 - 4 ]: ${end}"
-        read option
-        case $option in
-            1 ) install_font ; pause ;;
-            2 ) install_ohmyzsh ; pause ;;
-            3 ) install_sublime ; pause ;;
-            4 ) main_menu ;;
-            * ) echo -e "${red}${bold}invalid option...${end}" && sleep 2
-        esac
-    done
-    }
-
-        function install_font {
-            echo "Preparing to install Ubuntu and Microsoft Fonts..."; sleep 2
-            cd /tmp && \
-            wget https://assets.ubuntu.com/v1/0cef8205-ubuntu-font-family-0.83.zip && \
-            unzip 0cef8205-ubuntu-font-family-0.83.zip && \
-            sudo mv -f ubuntu-font-family-* /usr/share/fonts/ubuntu-font-family && \
-            sudo chmod -R --reference=/usr/share/fonts/open-sans /usr/share/fonts/ubuntu-font-family && \
-            sudo chown -R --reference=/usr/share/fonts/open-sans /usr/share/fonts/ubuntu-font-family && \
-            fc-cache -fv && \
-            sudo dnf install -y curl cabextract xorg-x11-font-utils fontconfig && \
-            sudo rpm -ivh https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcore-fonts-installer-2.6-1.noarch.rpm
-        }
-
-        function install_ohmyzsh {
-            echo "Preparing to install Oh My Zsh..."; sleep 2
-            sudo dnf install -y zsh powerline-fonts && \
-            sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
-            sudo lchsh $USER
-        }
-
-        function install_sublime {
-            echo "Preparing to install Sublime Text..."; sleep 2
-            sudo rpm -v --import https://download.sublimetext.com/sublimehq-rpm-pub.gpg && \
-            sudo dnf config-manager --add-repo https://download.sublimetext.com/rpm/stable/x86_64/sublime-text.repo && \
-            sudo dnf install -y sublime-text
-        }     
-            
-#infinite loop
-while true
-do
-
-main_menu
-done
+# install OhMyZsh
+sudo dnf install -y zsh \
+		powerline-fonts \
+		zsh-autosuggestions \
+		zsh-syntax-highlighting \
+		neofetch
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+sed -i '/source $ZSH\/oh-my-zsh.sh/ a\source \/usr\/share\/zsh-autosuggestions\/zsh-autosuggestions.zsh' ~/.zshrc
+sed -i '/source $ZSH\/oh-my-zsh.sh/ a\source \/usr\/share\/zsh-syntax-highlighting\/zsh-syntax-highlighting.zsh' ~/.zshrc
+sed -i 's/plugins=(git)/plugins=(docker firewalld dnf systemd sudo)/' ~/.zshrc
+sed -i '$a\neofetch --color_blocks off' ~/.zshrc
