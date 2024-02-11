@@ -78,12 +78,15 @@ gsettings set org.gnome.software packaging-format-preference "['flatpak', 'rpm']
 # install gtk3 themes, GIMP, Transmission, Calibre, LibreOffice, Flatseal, Discord, Drawio
 flatpak install --noninteractive flathub org.gtk.Gtk3theme.adw-gtk3 org.gtk.Gtk3theme.adw-gtk3-dark org.gimp.GIMP com.transmissionbt.Transmission com.calibre_ebook.calibre org.libreoffice.LibreOffice com.github.tchx84.Flatseal com.discordapp.Discord com.jgraph.drawio.desktop
 
-# install microsoft fonts
+# install microsoft fonts & multimedia codes
 sudo dnf install -y curl \
 		cabextract \
 		xorg-x11-font-utils \
 		fontconfig
 sudo rpm -ivh https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcore-fonts-installer-2.6-1.noarch.rpm
+sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-plugin-libav --exclude=gstreamer1-plugins-bad-free-devel
+sudo dnf install -y lame\* --exclude=lame-devel
+sudo dnf group upgrade -y --with-optional Multimedia
 
 # install OhMyZsh
 sudo dnf install -y zsh \
