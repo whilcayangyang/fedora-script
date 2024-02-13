@@ -3,10 +3,8 @@ user=$(whoami)
 laptop=$(hostnamectl chassis | grep laptop)
 desktop=$(hostnamectl chassis | grep desktop)
 
-# optimize DNF download
-sudo sh -c "echo 'max_parallel_downloads=10' | tee -a /etc/dnf/dnf.conf > /dev/null"
-
 # system upgrade
+sudo dnf check-update
 sudo dnf upgrade -y
 
 # install/remove necessary package
