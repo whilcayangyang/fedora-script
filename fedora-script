@@ -60,7 +60,7 @@ fi
 
 # install gns3 on Desktop
 if [ $desktop ]; then
-	sudo dnf install -y gns3-gui gns3-server wireshark
+	sudo dnf install -y gns3-gui gns3-server wireshark tigervnc
 	sudo usermod -aG kvm,wireshark $user
 else
 	echo "Nothing to do!"; sleep 2
