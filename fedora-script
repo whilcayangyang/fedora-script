@@ -8,9 +8,10 @@ sudo dnf check-update
 sudo dnf upgrade -y
 
 # install/remove necessary package
-sudo dnf autoremove -y libreoffice-core
+sudo dnf group remove "LibreOffice" -y
 sudo dnf install -y gnome-shell-extension-system-monitor-applet \
 			gnome-shell-extension-blur-my-shell \
+			gnome-shell-extension-appindicator \
 			gnome-tweaks \
 			lm_sensors \
 			adw-gtk3-theme \
