@@ -20,7 +20,7 @@ sudo dnf install -y gnome-shell-extension-system-monitor-applet \
 			thunderbird
 
 # install kvm virtualization
-sudo dnf install -y bridge-utils 
+sudo dnf install -y bridge-utils \
 			libvirt \
 			virt-install \
 			virt-manager \
