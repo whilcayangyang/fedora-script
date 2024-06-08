@@ -137,8 +137,7 @@ fi
 sudo dnf install -y zsh \
 		powerline-fonts \
 		zsh-autosuggestions \
-		zsh-syntax-highlighting \
-		neofetch
+		zsh-syntax-highlighting
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 sed -i '/source $ZSH\/oh-my-zsh.sh/ a\source \/usr\/share\/zsh-autosuggestions\/zsh-autosuggestions.zsh' ~/.zshrc
 sed -i '/source $ZSH\/oh-my-zsh.sh/ a\source \/usr\/share\/zsh-syntax-highlighting\/zsh-syntax-highlighting.zsh' ~/.zshrc
